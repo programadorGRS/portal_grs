@@ -1,0 +1,132 @@
+:root {
+    --color-primary: #0078D4;
+    --color-error: #D8000C;
+    --color-error-light: #FFD2D2;
+    --color-success: #4CAF50;
+    --color-success-light: #DFF2BF;
+    --color-warning: #FF9800;
+    --color-warning-light: #FEEFB3;
+    --color-info: #2196F3;
+    --color-info-light: #BDE5F8;
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: white;
+    border-left: 5px solid var(--color-error);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    max-width: 350px;
+    width: 100%;
+    animation: slideIn 0.3s ease-out;
+    z-index: 1000;
+}
+
+.toast.hide {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+.toast-icon {
+    margin-right: 15px;
+    color: var(--color-error);
+}
+
+.toast-content {
+    flex-grow: 1;
+}
+
+.toast-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-error);
+    margin-bottom: 5px;
+}
+
+.toast-message {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-left: 15px;
+}
+
+/* Toast variants */
+.toast.error {
+    border-left-color: var(--color-error);
+}
+.toast.error .toast-icon {
+    color: var(--color-error);
+}
+.toast.error .toast-title {
+    color: var(--color-error);
+}
+
+.toast.success {
+    border-left-color: var(--color-success);
+}
+.toast.success .toast-icon {
+    color: var(--color-success);
+}
+.toast.success .toast-title {
+    color: var(--color-success);
+}
+
+.toast.warning {
+    border-left-color: var(--color-warning);
+}
+.toast.warning .toast-icon {
+    color: var(--color-warning);
+}
+.toast.warning .toast-title {
+    color: var(--color-warning);
+}
+
+.toast.info {
+    border-left-color: var(--color-info);
+}
+.toast.info .toast-icon {
+    color: var(--color-info);
+}
+.toast.info .toast-title {
+    color: var(--color-info);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Icons */
+.error-svg, .success-svg, .warning-svg, .info-svg {
+    width: 24px;
+    height: 24px;
+}

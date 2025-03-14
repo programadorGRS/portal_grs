@@ -1,0 +1,309 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Convocação de Exames | Portal GRS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/convocacao.css' %}">
+{% endblock %}
+
+{% block header_title %}Convocação de Exames{% endblock %}
+
+{% block content %}
+<!-- Filtros -->
+<form method="get" action="{% url 'convocacao' %}" class="funcionarios-filters" id="filtroConvocacao">
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="filter-input">
+            <option value="">Todos os Status</option>
+            <option value="Vencido" {% if filtros.status == 'Vencido' %}selected{% endif %}>Vencido</option>
+            <option value="Pendente" {% if filtros.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+            <option value="A Vencer" {% if filtros.status == 'A Vencer' %}selected{% endif %}>A Vencer</option>
+            <option value="Em dia" {% if filtros.status == 'Em dia' %}selected{% endif %}>Em dia</option>
+            <option value="Sem histórico" {% if filtros.status == 'Sem histórico' %}selected{% endif %}>Sem histórico</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Vencimento</label>
+        <select name="vencimento" class="filter-input">
+            <option value="">Todos os Vencimentos</option>
+            <option value="30" {% if filtros.vencimento == '30' %}selected{% endif %}>Próximos 30 dias</option>
+            <option value="60" {% if filtros.vencimento == '60' %}selected{% endif %}>Próximos 60 dias</option>
+            <option value="120" {% if filtros.vencimento == '120' %}selected{% endif %}>Próximos 120 dias</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Unidade</label>
+        <select name="unidade" class="filter-input">
+            <option value="">Todas as Unidades</option>
+            {% for unidade in unidades %}
+                {% if unidade %}
+                <option value="{{ unidade }}" {% if filtros.unidade == unidade %}selected{% endif %}>{{ unidade }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Busca</label>
+        <input type="text" name="busca" class="filter-input" placeholder="Nome, CPF ou Matrícula" value="{{ filtros.busca }}">
+    </div>
+    
+    <div class="filter-group">
+        <label>&nbsp;</label>
+        <button type="submit" class="btn-primary">Filtrar</button>
+    </div>
+</form>
+
+<!-- KPIs -->
+<div class="kpi-cards">
+    <div class="kpi-card error">
+        <div class="kpi-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <h3>Exames Vencidos</h3>
+        </div>
+        <div class="kpi-value">{{ total_vencidos }}</div>
+        <div class="kpi-footer">
+            <span class="kpi-percentage">{{ percentual_vencidos }}%</span> do total de exames
+        </div>
+    </div>
+    
+    <div class="kpi-card warning">
+        <div class="kpi-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <h3>Exames Pendentes</h3>
+        </div>
+        <div class="kpi-value">{{ total_pendentes }}</div>
+        <div class="kpi-footer">
+            <span class="kpi-percentage">{{ percentual_pendentes }}%</span> do total de exames
+        </div>
+    </div>
+    
+    <div class="kpi-card info">
+        <div class="kpi-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <h3>A Vencer</h3>
+        </div>
+        <div class="kpi-value">{{ total_a_vencer }}</div>
+        <div class="kpi-footer">
+            <span class="kpi-percentage">{{ percentual_a_vencer }}%</span> do total de exames
+        </div>
+    </div>
+    
+    <div class="kpi-card success">
+        <div class="kpi-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <h3>Em Dia</h3>
+        </div>
+        <div class="kpi-value">{{ total_em_dia }}</div>
+        <div class="kpi-footer">
+            <span class="kpi-percentage">{{ percentual_em_dia }}%</span> do total de exames
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="graficos-grid">
+    <div class="grafico-container">
+        <h3 class="grafico-titulo">Distribuição de Exames por Status</h3>
+        <div class="grafico-canvas">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="grafico-container">
+        <h3 class="grafico-titulo">Evolução de Exames por Período</h3>
+        <div class="grafico-canvas">
+            <canvas id="evolucaoChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Convocações -->
+<div class="convocacoes-container">
+    <div class="table-header">
+        <h3>Colaboradores</h3>
+        <div class="table-actions">
+            <button id="exportarTodosCSV" class="btn-export">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Exportar Todos
+            </button>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="convocacoes-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Matrícula</th>
+                    <th>Cargo</th>
+                    <th>Setor</th>
+                    <th>Unidade</th>
+                    <th>Total de Exames</th>
+                    <th>Vencidos</th>
+                    <th>Pendentes</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for func in page_obj %}
+                <tr>
+                    <td>{{ func.nome }}</td>
+                    <td>{{ func.cpf_funcionario }}</td>
+                    <td>{{ func.matricula }}</td>
+                    <td>{{ func.cargo }}</td>
+                    <td>{{ func.setor }}</td>
+                    <td>{{ func.unidade }}</td>
+                    <td>{{ func.total_exames }}</td>
+                    <td>
+                        {% if func.exames_vencidos > 0 %}
+                            <span class="status-badge status-vencido">{{ func.exames_vencidos }}</span>
+                        {% else %}
+                            <span>0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if func.exames_pendentes > 0 %}
+                            <span class="status-badge status-pendente">{{ func.exames_pendentes }}</span>
+                        {% else %}
+                            <span>0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="button" class="btn-details" onclick="showConvocacaoDetails({{ func.codigo_funcionario }})">Detalhes</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" style="text-align: center;">Nenhum colaborador encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Paginação -->
+    <div class="pagination">
+        <span class="pagination-info">
+            Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} registros
+        </span>
+        <div class="pagination-controls">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">&laquo; Primeira</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">&lsaquo; Anterior</a>
+            {% else %}
+                <span class="pagination-link disabled">&laquo; Primeira</span>
+                <span class="pagination-link disabled">&lsaquo; Anterior</span>
+            {% endif %}
+            
+            <span class="current-page">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">Próxima &rsaquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">Última &raquo;</a>
+            {% else %}
+                <span class="pagination-link disabled">Próxima &rsaquo;</span>
+                <span class="pagination-link disabled">Última &raquo;</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes da Convocação -->
+<div class="convocacao-modal" id="convocacaoModal">
+    <div class="convocacao-modal-content">
+        <div class="convocacao-modal-header">
+            <h2 id="convocacaoModalTitle">Exames do Colaborador</h2>
+            <button type="button" class="convocacao-modal-close" id="convocacaoModalClose" onclick="closeConvocacaoModal()">&times;</button>
+        </div>
+        <div class="convocacao-modal-body">
+            <div id="colaboradorInfo" class="colaborador-info">
+                <!-- Preenchido via JavaScript -->
+            </div>
+            
+            <div class="convocacao-modal-actions">
+                <button id="exportarColaboradorCSV" class="btn-export">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Exportar CSV
+                </button>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div id="examesContainer" class="exames-container">
+                <table class="exames-table">
+                    <thead>
+                        <tr>
+                            <th>Exame</th>
+                            <th>Último Pedido</th>
+                            <th>Data Resultado</th>
+                            <th>Periodicidade</th>
+                            <th>Data Refazer</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="examesTableBody">
+                        <!-- Preenchido via JavaScript -->
+                        <tr>
+                            <td colspan="6" class="loading-data">
+                                <div class="loading-spinner"></div>
+                                <p>Carregando exames...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="{% static 'dashboard/js/convocacao.js' %}"></script>
+<script>
+    // Dados para os gráficos vindos do backend
+    const statusData = {{ status_data|safe }};
+    const evolucaoData = {{ evolucao_data|safe }};
+</script>
+<script>
+    // Direct implementation of the close function available in global scope
+    function closeConvocacaoModal() {
+      const modal = document.getElementById('convocacaoModal');
+      if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+          modal.style.display = 'none';
+        }, 300);
+      }
+    }
+    </script>
+{% endblock %}

@@ -1,0 +1,453 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Absenteísmo | Portal GRS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/absenteismo.css' %}">
+{% endblock %}
+
+{% block header_title %}Absenteísmo{% endblock %}
+
+{% block content %}
+<!-- Filtros -->
+<form method="get" action="{% url 'absenteismo' %}" class="funcionarios-filters" id="filtroForm">
+    <div class="filter-group">
+        <label>Período</label>
+        <div class="periodo-tabs">
+            <div class="periodo-tab {% if filtros.periodo == '30' %}active{% endif %}" data-periodo="30">Últimos 30 dias</div>
+            <div class="periodo-tab {% if filtros.periodo == '90' %}active{% endif %}" data-periodo="90">Últimos 3 meses</div>
+            <div class="periodo-tab {% if filtros.periodo == '180' %}active{% endif %}" data-periodo="180">Últimos 6 meses</div>
+            <div class="periodo-tab {% if filtros.periodo == '365' %}active{% endif %}" data-periodo="365">Último ano</div>
+            <div class="periodo-tab {% if filtros.periodo == 'custom' %}active{% endif %}" data-periodo="custom">Personalizado</div>
+        </div>
+        <input type="hidden" name="periodo" id="periodoInput" value="{{ filtros.periodo }}">
+    </div>
+    
+    <div class="filter-group date-range" {% if filtros.periodo != 'custom' %}style="display: none;"{% endif %}>
+        <label>Data Início</label>
+        <input type="date" name="data_inicio" class="filter-input" value="{{ filtros.data_inicio }}">
+    </div>
+    
+    <div class="filter-group date-range" {% if filtros.periodo != 'custom' %}style="display: none;"{% endif %}>
+        <label>Data Fim</label>
+        <input type="date" name="data_fim" class="filter-input" value="{{ filtros.data_fim }}">
+    </div>
+    
+    <div class="filter-group">
+        <label>Tipo de Atestado</label>
+        <select name="tipo_atestado" class="filter-input">
+            <option value="">Todos os tipos</option>
+            {% for tipo_id, tipo_nome in tipos_atestado %}
+                <option value="{{ tipo_id }}" {% if filtros.tipo_atestado == tipo_id|stringformat:"i" %}selected{% endif %}>{{ tipo_nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Setor</label>
+        <select name="setor" class="filter-input">
+            <option value="">Todos os Setores</option>
+            {% for setor_nome in setores %}
+                {% if setor_nome %}
+                <option value="{{ setor_nome }}" {% if filtros.setor == setor_nome %}selected{% endif %}>{{ setor_nome }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Unidade</label>
+        <select name="unidade" class="filter-input">
+            <option value="">Todas as Unidades</option>
+            {% for unidade_nome in unidades %}
+                {% if unidade_nome %}
+                <option value="{{ unidade_nome }}" {% if filtros.unidade == unidade_nome %}selected{% endif %}>{{ unidade_nome }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Busca</label>
+        <input type="text" name="busca" class="filter-input" placeholder="Nome, Matrícula ou CID" value="{{ filtros.busca }}">
+    </div>
+    
+    <div class="filter-group">
+        <label>&nbsp;</label>
+        <button type="submit" class="btn-primary">Filtrar</button>
+    </div>
+</form>
+
+<!-- KPIs -->
+<div class="kpi-cards">
+    <div class="kpi-card">
+        <div class="kpi-label">Total de Registros</div>
+        <div class="kpi-value">{{ total_registros }}</div>
+        <div class="kpi-description">Atestados registrados no período</div>
+    </div>
+    
+    <div class="kpi-card warning">
+        <div class="kpi-label">Total de Dias</div>
+        <div class="kpi-value">{{ total_dias_afastamento }}</div>
+        <div class="kpi-description">Dias de afastamento no período</div>
+    </div>
+    
+    <div class="kpi-card {% if media_dias > 5 %}error{% else %}success{% endif %}">
+        <div class="kpi-label">Média de Dias</div>
+        <div class="kpi-value">{{ media_dias }}</div>
+        <div class="kpi-description">Média de dias por atestado</div>
+    </div>
+    
+    <div class="kpi-card">
+        <div class="kpi-label">Funcionários Afastados</div>
+        <div class="kpi-value">{{ funcionarios_afastados }}</div>
+        <div class="kpi-description">Distintos no período selecionado</div>
+    </div>
+    
+    <div class="kpi-card {% if indice_absenteismo > 5 %}error{% elif indice_absenteismo > 3 %}warning{% else %}success{% endif %}">
+        <div class="kpi-label">Índice de Absenteísmo</div>
+        <div class="kpi-value">{{ indice_absenteismo }}%</div>
+        <div class="kpi-description">% de dias perdidos no período</div>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="graficos-grid">
+    <div class="grafico-container">
+        <div class="grafico-titulo">Tendência de Absenteísmo</div>
+        <div class="grafico-canvas">
+            <canvas id="tendenciaChart"></canvas>
+        </div>
+        <div class="grafico-info">Evolução mensal de absenteísmo no período selecionado</div>
+    </div>
+    
+    <div class="grafico-container">
+        <div class="grafico-titulo">Distribuição por Tipo de Atestado</div>
+        <div class="grafico-canvas">
+            <canvas id="tiposChart"></canvas>
+        </div>
+        <div class="grafico-info">Percentual de cada tipo de afastamento</div>
+    </div>
+    
+    <div class="grafico-container">
+        <div class="grafico-titulo">Top 5 CIDs (Causas de Afastamento)</div>
+        <div class="grafico-canvas">
+            <canvas id="cidsChart"></canvas>
+        </div>
+        <div class="grafico-info">Principais causas médicas relatadas nos atestados</div>
+    </div>
+    
+    <div class="grafico-container">
+        <div class="grafico-titulo">Absenteísmo por Setor</div>
+        <div class="grafico-canvas">
+            <canvas id="setoresChart"></canvas>
+        </div>
+        <div class="grafico-info">Totais por setor/departamento</div>
+    </div>
+</div>
+
+<!-- Ranking de Funcionários -->
+<div class="recent-activities">
+    <h2 class="section-title">Funcionários com Mais Atestados</h2>
+    
+    <div class="table-responsive">
+        <table class="funcionarios-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Matrícula</th>
+                    <th>Cargo</th>
+                    <th>Setor</th>
+                    <th>Unidade</th>
+                    <th>Total Atestados</th>
+                    <th>Dias Afastados</th>
+                    <th>Último Atestado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for func in funcionarios_ranking %}
+                <tr>
+                    <td>{{ func.funcionario__nome|default:"Não identificado" }}</td>
+                    <td>{{ func.matricula_func }}</td>
+                    <td>{{ func.funcionario__nome_cargo|default:"-" }}</td>
+                    <td>{{ func.funcionario__nome_setor|default:"-" }}</td>
+                    <td>{{ func.funcionario__nome_unidade|default:"-" }}</td>
+                    <td>{{ func.total_atestados }}</td>
+                    <td>{{ func.total_dias }}</td>
+                    <td>{{ func.ultimo_atestado|date:"d/m/Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center;">Nenhum registro encontrado para o período.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="{% static 'dashboard/js/absenteismo.js' %}"></script>
+<script>
+// Dados para os gráficos (via JSON do backend)
+const tendenciaData = {{ tendencia_data|safe }};
+const tiposData = {{ tipos_data|safe }};
+const cidsData = {{ cids_data|safe }};
+const setoresData = {{ setores_data|safe }};
+
+// Esta função será chamada pelo arquivo externo absenteismo.js
+function initCharts() {
+    // Paleta de cores
+    const colors = {
+        primary: '#2563eb',
+        primaryLight: '#3b82f6',
+        secondary: '#4b5563',
+        success: '#10b981',
+        warning: '#f59e0b',
+        error: '#ef4444',
+        info: '#3b82f6',
+        // Tons extras para gráficos
+        blue: ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+        green: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'],
+        orange: ['#f59e0b', '#fbbf24', '#fcd34d', '#fde68a', '#fef3c7'],
+        red: ['#ef4444', '#f87171', '#fca5a5', '#fecaca', '#fee2e2'],
+        purple: ['#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'],
+    };
+    
+    // 1. Gráfico de Tendência
+    const tendenciaCtx = document.getElementById('tendenciaChart').getContext('2d');
+    new Chart(tendenciaCtx, {
+        type: 'line',
+        data: {
+            labels: tendenciaData.map(item => {
+                const [year, month] = item.mes.split('-');
+                return `${month}/${year}`;
+            }),
+            datasets: [
+                {
+                    label: 'Qtd. Atestados',
+                    data: tendenciaData.map(item => item.total),
+                    borderColor: colors.primary,
+                    backgroundColor: colors.primary + '20',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Dias Perdidos',
+                    data: tendenciaData.map(item => item.dias),
+                    borderColor: colors.warning,
+                    backgroundColor: colors.warning + '20',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    fill: false,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Atestados'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Dias Perdidos'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y;
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // 2. Gráfico de Distribuição por Tipo
+    const tiposCtx = document.getElementById('tiposChart').getContext('2d');
+    new Chart(tiposCtx, {
+        type: 'doughnut',
+        data: {
+            labels: tiposData.map(item => item.label),
+            datasets: [{
+                data: tiposData.map(item => item.total),
+                backgroundColor: [
+                    colors.blue[0],
+                    colors.green[0],
+                    colors.orange[0],
+                    colors.red[0],
+                    colors.purple[0]
+                ],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value = context.raw;
+                            const percentage = Math.round((value / total) * 100);
+                            return `${context.label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // 3. Gráfico de Top CIDs
+    const cidsCtx = document.getElementById('cidsChart').getContext('2d');
+    new Chart(cidsCtx, {
+        type: 'bar',
+        data: {
+            labels: cidsData.map(item => `${item.cid} - ${item.descricao.substring(0, 25)}${item.descricao.length > 25 ? '...' : ''}`),
+            datasets: [{
+                label: 'Quantidade',
+                data: cidsData.map(item => item.total),
+                backgroundColor: colors.blue[1],
+                borderColor: colors.blue[0],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const idx = tooltipItems[0].dataIndex;
+                            return `${cidsData[idx].cid} - ${cidsData[idx].descricao}`;
+                        },
+                        label: function(context) {
+                            const idx = context.dataIndex;
+                            return [
+                                `Quantidade: ${cidsData[idx].total}`,
+                                `Dias Perdidos: ${cidsData[idx].dias}`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // 4. Gráfico por Setor
+    const setoresCtx = document.getElementById('setoresChart').getContext('2d');
+    new Chart(setoresCtx, {
+        type: 'bar',
+        data: {
+            labels: setoresData.map(item => item.setor),
+            datasets: [
+                {
+                    label: 'Atestados',
+                    data: setoresData.map(item => item.total),
+                    backgroundColor: colors.primary,
+                    borderColor: colors.primaryLight,
+                    borderWidth: 1,
+                    order: 2
+                },
+                {
+                    label: 'Dias Perdidos',
+                    data: setoresData.map(item => item.dias),
+                    type: 'line',
+                    borderColor: colors.warning,
+                    backgroundColor: colors.warning,
+                    borderWidth: 2,
+                    pointStyle: 'rectRot',
+                    pointRadius: 5,
+                    pointBorderColor: colors.warning,
+                    order: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

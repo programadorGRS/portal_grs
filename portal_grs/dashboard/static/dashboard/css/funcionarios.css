@@ -1,0 +1,291 @@
+/* dashboard/static/dashboard/css/funcionarios.css */
+
+.funcionarios-content {
+    padding: 20px;
+    background-color: var(--color-background);
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.funcionarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.funcionarios-filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+}
+
+.filter-input {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Tabela de Funcionários */
+.funcionarios-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.funcionarios-table thead {
+    background-color: var(--color-background);
+}
+
+.funcionarios-table th, 
+.funcionarios-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.funcionarios-table th {
+    font-weight: 600;
+    color: var(--color-text-dark);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.funcionarios-table tr:last-child td {
+    border-bottom: none;
+}
+
+.funcionarios-table tr:hover {
+    background-color: var(--color-hover);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-ativo {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+}
+
+.status-inativo {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.status-afastado {
+    background-color: rgba(243, 156, 18, 0.1);
+    color: #f39c12;
+}
+
+.status-ferias {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.btn-details {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+}
+
+.btn-details:hover {
+    background-color: #005BA1;
+}
+
+/* Modal de Detalhes */
+.funcionario-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.funcionario-modal.show {
+    display: flex !important;
+    opacity: 1;
+}
+
+.funcionario-modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 800px;
+    max-width: 90%;
+    max-height: 90vh;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.funcionario-modal.show .funcionario-modal-content {
+    transform: scale(1);
+}
+
+.funcionario-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.funcionario-modal-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    margin: 0;
+}
+
+.funcionario-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.funcionario-modal-close:hover {
+    color: var(--color-primary);
+}
+
+.funcionario-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(90vh - 60px);
+}
+
+.funcionario-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.detail-group {
+    margin-bottom: 15px;
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    font-size: 0.95rem;
+    color: var(--color-text-dark);
+    font-weight: 500;
+}
+
+.detail-section {
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 15px;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+}
+
+.detail-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 15px;
+}
+
+/* Adicione estes estilos ao seu arquivo funcionarios.css */
+
+/* Estilos para a paginação */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px 0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.pagination-info {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pagination-link {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--color-text-dark);
+    text-decoration: none;
+    background-color: white;
+    border: 1px solid var(--color-border);
+    transition: all 0.2s;
+}
+
+.pagination-link:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.pagination-link.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+}
+
+.current-page {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    color: var(--color-text-dark);
+}

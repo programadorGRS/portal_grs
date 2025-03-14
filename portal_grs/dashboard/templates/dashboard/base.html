@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portal GRS{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dashboard/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/toast.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/loading.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/modal.css' %}">
+    {% block extra_css %}{% endblock %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'dashboard/images/logo.png' %}" alt="Logo Portal GRS" onerror="this.src='{% static 'dashboard/images/default-logo.png' %}'; this.onerror='';">
+        </div>
+        <div class="sidebar-menu">
+            <a href="{% url 'dashboard' %}" class="sidebar-menu-item {% if request.path == '/dashboard/' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'funcionarios' %}" class="sidebar-menu-item {% if request.path == '/funcionarios/' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span>Colaboradores</span>
+            </a>
+            <a href="{% url 'absenteismo' %}" class="sidebar-menu-item {% if request.path == '/absenteismo/' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <span>Absenteísmo</span>
+            </a>
+            <a href="{% url 'convocacao' %}" class="sidebar-menu-item {% if request.path == '/convocacoes/' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 7h6m-6 4h6m-6-8h.01M9 16h.01" />
+                </svg>
+                <span>Convocações</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>{% block header_title %}Dashboard{% endblock %}</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-profile" id="user-profile">
+                    <span>{{ request.user.nome }}</span>
+                    <div class="user-profile-img">
+                        {% if request.user.nome %}
+                            {{ request.user.nome|slice:":1" }}{{ request.user.nome.split|last|slice:":1" }}
+                        {% else %}
+                            US
+                        {% endif %}
+                    </div>
+                    <!-- Dropdown Menu -->
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="dropdown-item" id="settings-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Configurações</span>
+                        </div>
+                        <div class="dropdown-item" id="logout-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>Sair</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- Settings Modal (inicialmente escondido) -->
+    <div class="settings-modal" id="settingsModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configurações</h2>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="settingsForm" method="post" action="{% url 'update_settings' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="empresa">Selecionar Empresa</label>
+                        <select class="select-empresa" id="empresa" name="empresa">
+                            {% for empresa in empresas_acessiveis %}
+                                <option value="{{ empresa.codigo }}" {% if empresa.codigo == empresa_atual.codigo %}selected{% endif %}>
+                                    {{ empresa.nome_abreviado }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="senhaAtual">Senha Atual</label>
+                        <input type="password" class="form-control" id="senhaAtual" name="senha_atual" placeholder="Digite sua senha atual">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novaSenha">Nova Senha</label>
+                        <input type="password" class="form-control" id="novaSenha" name="nova_senha" placeholder="Digite sua nova senha">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmarSenha">Confirmar Nova Senha</label>
+                        <input type="password" class="form-control" id="confirmarSenha" name="confirmar_senha" placeholder="Confirme sua nova senha">
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'dashboard/js/base.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Exibir mensagens do Django como toasts -->
+    {% if messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                {% for message in messages %}
+                    window.showToast(
+                        '{{ message.tags|title }}', 
+                        '{{ message }}', 
+                        '{{ message.tags }}'
+                    );
+                {% endfor %}
+            });
+        </script>
+    {% endif %}
+</body>
+</html>

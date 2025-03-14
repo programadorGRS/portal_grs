@@ -1,0 +1,483 @@
+/* dashboard/static/dashboard/css/convocacao.css */
+
+/* KPI Cards */
+.kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+}
+
+.kpi-card {
+    background-color: var(--color-bg-card);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-4) var(--spacing-5);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--color-primary);
+}
+
+.kpi-card.error::before {
+    background-color: var(--color-error);
+}
+
+.kpi-card.warning::before {
+    background-color: var(--color-warning);
+}
+
+.kpi-card.success::before {
+    background-color: var(--color-success);
+}
+
+.kpi-card.info::before {
+    background-color: var(--color-info);
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.kpi-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-2);
+}
+
+.kpi-header svg {
+    width: 22px;
+    height: 22px;
+    margin-right: var(--spacing-2);
+    color: var(--color-text-secondary);
+}
+
+.kpi-card.error .kpi-header svg {
+    color: var(--color-error);
+}
+
+.kpi-card.warning .kpi-header svg {
+    color: var(--color-warning);
+}
+
+.kpi-card.success .kpi-header svg {
+    color: var(--color-success);
+}
+
+.kpi-card.info .kpi-header svg {
+    color: var(--color-info);
+}
+
+.kpi-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.kpi-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: var(--spacing-2) 0;
+}
+
+.kpi-footer {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-top: auto;
+}
+
+.kpi-percentage {
+    font-weight: 600;
+}
+
+.kpi-card.error .kpi-percentage {
+    color: var(--color-error);
+}
+
+.kpi-card.warning .kpi-percentage {
+    color: var(--color-warning);
+}
+
+.kpi-card.success .kpi-percentage {
+    color: var(--color-success);
+}
+
+.kpi-card.info .kpi-percentage {
+    color: var(--color-info);
+}
+
+/* Gráficos */
+.graficos-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+}
+
+@media (max-width: 1024px) {
+    .graficos-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.grafico-container {
+    background-color: var(--color-bg-card);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-5);
+    box-shadow: var(--shadow-md);
+}
+
+.grafico-titulo {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-4);
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-bg-hover);
+    padding-bottom: var(--spacing-3);
+}
+
+.grafico-canvas {
+    position: relative;
+    min-height: 300px;
+    width: 100%;
+}
+
+/* Tabela de Convocações */
+.convocacoes-container {
+    background-color: var(--color-bg-card);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-5);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-6);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--color-bg-hover);
+    padding-bottom: var(--spacing-3);
+}
+
+.table-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.table-actions {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    background-color: var(--color-bg-hover);
+    border: none;
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-export:hover {
+    background-color: var(--color-text-light);
+    color: var(--color-text-white);
+}
+
+.btn-export svg {
+    width: 16px;
+    height: 16px;
+}
+
+.convocacoes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-4);
+}
+
+.convocacoes-table th {
+    background-color: var(--color-primary);
+    color: var(--color-text-white);
+    text-align: left;
+    padding: var(--spacing-3) var(--spacing-4);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.convocacoes-table tr:nth-child(even) {
+    background-color: var(--color-bg-hover);
+}
+
+.convocacoes-table td {
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--color-bg-hover);
+}
+
+.convocacoes-table tr:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-vencido {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+}
+
+.status-pendente {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+}
+
+.status-a-vencer {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-info);
+}
+
+.status-em-dia {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+}
+
+/* Modal de Convocação */
+.convocacao-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: var(--transition-normal);
+}
+
+.convocacao-modal.show {
+    opacity: 1;
+}
+
+.convocacao-modal-content {
+    background-color: var(--color-bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: var(--transition-normal);
+}
+
+.convocacao-modal.show .convocacao-modal-content {
+    transform: translateY(0);
+}
+
+.convocacao-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-5);
+    border-bottom: 1px solid var(--color-bg-hover);
+}
+
+.convocacao-modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.convocacao-modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--border-radius-full);
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.convocacao-modal-close:hover {
+    background-color: var(--color-text-light);
+    color: var(--color-text-white);
+}
+
+.convocacao-modal-body {
+    padding: var(--spacing-5);
+}
+
+.colaborador-info {
+    background-color: var(--color-bg-hover);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+}
+
+.colaborador-info h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: var(--spacing-3);
+    color: var(--color-text-primary);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.info-group {
+    margin-bottom: var(--spacing-2);
+}
+
+.info-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-1);
+}
+
+.info-value {
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+}
+
+.convocacao-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--spacing-4);
+}
+
+.divider {
+    height: 1px;
+    background-color: var(--color-bg-hover);
+    margin: var(--spacing-4) 0;
+}
+
+.exames-container {
+    margin-top: var(--spacing-4);
+}
+
+.exames-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.exames-table th {
+    background-color: var(--color-primary-light);
+    color: var(--color-text-white);
+    text-align: left;
+    padding: var(--spacing-3);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.exames-table tr:nth-child(even) {
+    background-color: var(--color-bg-hover);
+}
+
+.exames-table td {
+    padding: var(--spacing-3);
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--color-bg-hover);
+}
+
+.loading-data {
+    text-align: center;
+    padding: var(--spacing-6);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--color-bg-hover);
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: var(--spacing-2);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .kpi-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .graficos-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .convocacao-modal-content {
+        width: 95%;
+        max-width: none;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .kpi-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-3);
+    }
+    
+    .convocacao-modal-body {
+        padding: var(--spacing-3);
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}

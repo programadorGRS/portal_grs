@@ -1,0 +1,368 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Colaboradores | Portal GRS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/funcionarios.css' %}">
+{% endblock %}
+
+{% block header_title %}Colaboradores{% endblock %}
+
+{% block content %}
+<div class="funcionarios-content">
+    <!-- Exibir informações da empresa atual (padronizando com o dashboard) -->
+    <div class="current-company-info">
+        <h3>Empresa Atual:</h3>
+        <p><strong>{{ empresa_atual.nome_abreviado }}</strong></p>
+        <p>CNPJ: {{ empresa_atual.cnpj }}</p>
+    </div>
+    
+    <!-- Filtros -->
+    <form method="get" action="{% url 'funcionarios' %}" class="funcionarios-filters">
+        <div class="filter-group">
+            <label>Cargo</label>
+            <select name="cargo" class="filter-input" id="cargo-filter">
+                <option value="">Todos os Cargos</option>
+                {% for cargo in cargos %}
+                    {% if cargo %}
+                    <option value="{{ cargo }}" {% if filtros.cargo == cargo %}selected{% endif %}>{{ cargo }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Setor</label>
+            <select name="setor" class="filter-input" id="setor-filter">
+                <option value="">Todos os Setores</option>
+                {% for setor in setores %}
+                    {% if setor %}
+                    <option value="{{ setor }}" {% if filtros.setor == setor %}selected{% endif %}>{{ setor }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Unidade</label>
+            <select name="unidade" class="filter-input" id="unidade-filter">
+                <option value="">Todas as Unidades</option>
+                {% for unidade in unidades %}
+                    {% if unidade %}
+                    <option value="{{ unidade }}" {% if filtros.unidade == unidade %}selected{% endif %}>{{ unidade }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Busca</label>
+            <input type="text" name="busca" class="filter-input" placeholder="Nome, CPF ou Matrícula" value="{{ filtros.busca }}">
+        </div>
+        <div class="filter-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn-primary">Filtrar</button>
+        </div>
+    </form>
+
+    <!-- Tabela de Funcionários -->
+    <div class="table-responsive">
+        <table class="funcionarios-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Cargo</th>
+                    <th>Setor</th>
+                    <th>Unidade</th>
+                    <th>Data de Admissão</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for func in page_obj %}
+                <tr>
+                    <td>{{ func.nome }}</td>
+                    <td>{{ func.cpf }}</td>
+                    <td>{{ func.nome_cargo }}</td>
+                    <td>{{ func.nome_setor }}</td>
+                    <td>{{ func.nome_unidade }}</td>
+                    <td>{{ func.data_admissao|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if func.situacao == 'ATIVO' %}
+                            <span class="status-badge status-ativo">Ativo</span>
+                        {% elif func.situacao == 'INATIVO' %}
+                            <span class="status-badge status-inativo">Inativo</span>
+                        {% elif func.situacao == 'FÉRIAS' %}
+                            <span class="status-badge status-ferias">Férias</span>
+                        {% elif func.situacao == 'AFASTADO' %}
+                            <span class="status-badge status-afastado">Afastado</span>
+                        {% else %}
+                            <span class="status-badge">{{ func.situacao }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <!-- CORREÇÃO CRÍTICA: garantir que o código esteja presente -->
+                        {% if func.codigo %}
+                            <button type="button" class="btn-details" onclick="showFuncionarioDetails({{ func.codigo }})">Detalhes</button>
+                        {% else %}
+                            <button type="button" class="btn-details" disabled>Indisponível</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center;">Nenhum funcionário encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginação -->
+    <div class="pagination">
+        <span class="pagination-info">
+            Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} registros
+        </span>
+        <div class="pagination-controls">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">&laquo; Primeira</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">&lsaquo; Anterior</a>
+            {% else %}
+                <span class="pagination-link disabled">&laquo; Primeira</span>
+                <span class="pagination-link disabled">&lsaquo; Anterior</span>
+            {% endif %}
+            
+            <span class="current-page">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">Próxima &rsaquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in filtros.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">Última &raquo;</a>
+            {% else %}
+                <span class="pagination-link disabled">Próxima &rsaquo;</span>
+                <span class="pagination-link disabled">Última &raquo;</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes do Funcionário -->
+<div class="funcionario-modal" id="funcionarioModal">
+    <div class="funcionario-modal-content">
+        <div class="funcionario-modal-header">
+            <h2 id="funcionarioModalTitle">Detalhes do Colaborador</h2>
+            <button class="funcionario-modal-close" id="funcionarioModalClose">&times;</button>
+        </div>
+        <div class="funcionario-modal-body">
+            <div id="funcionarioDetails" class="funcionario-details">
+                <!-- Será preenchido via JavaScript -->
+                <div class="loading-indicator">
+                    <div class="loading-spinner"></div>
+                    <p>Carregando dados do colaborador...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Verificar se o modal de funcionário está funcionando corretamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar event listener para o botão de fechar o modal
+    const modalClose = document.getElementById('funcionarioModalClose');
+    if (modalClose) {
+        modalClose.addEventListener('click', function() {
+            const modal = document.getElementById('funcionarioModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    // Adicionar event listeners para fechar o modal ao clicar fora dele
+    const modal = document.getElementById('funcionarioModal');
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    // Verificar a existência da função de detalhes
+    if (typeof window.showFuncionarioDetails !== 'function') {
+        console.error('A função showFuncionarioDetails não está definida');
+        // Definir a função se ela não existir
+        window.showFuncionarioDetails = function(id) {
+            if (!id) {
+                console.error('ID do funcionário não fornecido');
+                return;
+            }
+            
+            console.log('Solicitando detalhes do funcionário ID:', id);
+            
+            const modal = document.getElementById('funcionarioModal');
+            const modalTitle = document.getElementById('funcionarioModalTitle');
+            const detailsContainer = document.getElementById('funcionarioDetails');
+            
+            if (!modal || !modalTitle || !detailsContainer) {
+                console.error('Elementos do modal não encontrados');
+                return;
+            }
+            
+            // Mostrar loading
+            detailsContainer.innerHTML = `
+                <div class="loading-indicator" style="text-align: center; padding: 2rem;">
+                    <div class="loading-spinner" style="display: inline-block; width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div>
+                    <p>Carregando dados do colaborador (ID: ${id})...</p>
+                </div>
+            `;
+            
+            // Mostrar o modal imediatamente com o indicador de carregamento
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+            
+            // Fazer requisição AJAX para obter os dados do funcionário
+            fetch(`/api/funcionarios/${id}/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro ao obter dados: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Dados recebidos:', data);
+                    
+                    // Preencher o título
+                    modalTitle.textContent = `Detalhes de ${data.nome}`;
+                    
+                    // Preencher os detalhes
+                    detailsContainer.innerHTML = `
+                        <div class="detail-section">
+                            <h3 class="detail-section-title">Informações Pessoais</h3>
+                            <div class="funcionario-details">
+                                <div class="detail-group">
+                                    <div class="detail-label">Nome</div>
+                                    <div class="detail-value">${data.nome || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">CPF</div>
+                                    <div class="detail-value">${data.cpf || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">RG</div>
+                                    <div class="detail-value">${data.rg || '-'} ${data.orgao_emissor_rg ? '- ' + data.orgao_emissor_rg : ''} ${data.uf_rg ? '- ' + data.uf_rg : ''}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Data de Nascimento</div>
+                                    <div class="detail-value">${data.data_nascimento || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Sexo</div>
+                                    <div class="detail-value">${data.sexo === 1 ? 'Masculino' : data.sexo === 2 ? 'Feminino' : '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3 class="detail-section-title">Informações de Contato</h3>
+                            <div class="funcionario-details">
+                                <div class="detail-group">
+                                    <div class="detail-label">Endereço</div>
+                                    <div class="detail-value">${data.endereco || '-'} ${data.numero_endereco ? ', ' + data.numero_endereco : ''}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Bairro</div>
+                                    <div class="detail-value">${data.bairro || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Cidade/UF</div>
+                                    <div class="detail-value">${data.cidade || '-'} ${data.uf ? '- ' + data.uf : ''}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">CEP</div>
+                                    <div class="detail-value">${data.cep || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Telefone</div>
+                                    <div class="detail-value">${data.telefone_residencial || data.telefone_celular || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Email</div>
+                                    <div class="detail-value">${data.email || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3 class="detail-section-title">Informações Profissionais</h3>
+                            <div class="funcionario-details">
+                                <div class="detail-group">
+                                    <div class="detail-label">Matrícula</div>
+                                    <div class="detail-value">${data.matricula_funcionario || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Cargo</div>
+                                    <div class="detail-value">${data.nome_cargo || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Setor</div>
+                                    <div class="detail-value">${data.nome_setor || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Unidade</div>
+                                    <div class="detail-value">${data.nome_unidade || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Centro de Custo</div>
+                                    <div class="detail-value">${data.nome_centro_custo || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Data de Admissão</div>
+                                    <div class="detail-value">${data.data_admissao || '-'}</div>
+                                </div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Situação</div>
+                                    <div class="detail-value">${data.situacao || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    detailsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                            <h3>Erro ao carregar dados</h3>
+                            <p>Não foi possível obter os detalhes do funcionário (ID: ${id}). Por favor, tente novamente mais tarde.</p>
+                            <p>Erro: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        };
+    }
+    
+    // Teste se os botões de detalhes estão com os IDs corretos
+    const botoesDetalhes = document.querySelectorAll('.btn-details');
+    botoesDetalhes.forEach(botao => {
+        const codigo = botao.getAttribute('onclick')?.match(/\d+/);
+        if (codigo) {
+            console.log('Botão com ID:', codigo[0]);
+        } else {
+            console.warn('Botão sem ID:', botao);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal GRS - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dashboard/css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/toast.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/loading.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="{% static 'dashboard/images/logo.png' %}" alt="Logo Portal GRS" onerror="this.src='{% static 'dashboard/images/default-logo.png' %}'; this.onerror='';">
+        </div>
+        
+        <h1 class="login-title">Entrar</h1>
+        
+        <form id="loginForm" class="login-form" method="post" action="{% url 'login_auth' %}">
+            {% csrf_token %}
+            <div class="input-wrapper">
+                <input 
+                    type="email" 
+                    id="id_username" 
+                    name="username"
+                    class="login-input" 
+                    placeholder="Email corporativo" 
+                    required 
+                    autocomplete="username"
+                    {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
+                >
+            </div>
+            
+            <div class="input-wrapper">
+                <input 
+                    type="password" 
+                    id="id_password" 
+                    name="password"
+                    class="login-input" 
+                    placeholder="Senha" 
+                    required 
+                    autocomplete="current-password"
+                >
+            </div>
+            
+            <button type="submit" class="login-btn">Próximo</button>
+            
+            <div id="error-message"></div>
+            
+            <div class="login-extras">
+                <a href="#">Esqueceu a senha?</a>
+            </div>
+            
+            <input type="hidden" name="next" value="{{ next|default:'/dashboard/' }}">
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'dashboard/js/toast.js' %}"></script>
+    <script src="{% static 'dashboard/js/loading.js' %}"></script>
+    <script src="{% static 'dashboard/js/login.js' %}"></script>
+    
+    <!-- Display toast messages for form errors -->
+    {% if form.errors %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast('Erro de Login', 'Email ou senha incorretos. Por favor, verifique suas credenciais.', 'error');
+            });
+        </script>
+    {% endif %}
+    
+    <!-- Display Django messages as toasts -->
+    {% if messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                {% for message in messages %}
+                    showToast(
+                        '{{ message.tags|title }}', 
+                        '{{ message }}', 
+                        '{{ message.tags }}'
+                    );
+                {% endfor %}
+            });
+        </script>
+    {% endif %}
+</body>
+</html>

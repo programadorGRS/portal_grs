@@ -1,0 +1,146 @@
+:root {
+    --color-primary: #0078D4;
+    --color-background: #F5F5F5;
+    --color-text: #1E1E1E;
+    --color-border: #E0E0E0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    background-color: var(--color-background);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.logo {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo img {
+    max-width: 200px;
+    height: auto;
+}
+
+.login-title {
+    color: var(--color-text);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+.login-input::placeholder {
+    color: #757575;
+}
+
+.login-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.login-btn:hover {
+    background-color: #005BA1;
+}
+
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+.login-extras {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.login-extras a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.login-extras a:hover {
+    text-decoration: underline;
+}
+
+#error-message {
+    color: #D8000C;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: left;
+}
+
+.alert-error {
+    background-color: rgba(216, 0, 12, 0.1);
+    border-left: 4px solid #D8000C;
+    color: #D8000C;
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        width: 95%;
+        padding: 30px 20px;
+    }
+}
