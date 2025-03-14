@@ -80,18 +80,18 @@ WSGI_APPLICATION = 'portal_grs.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+ 
 # Configuração para SQLite3 (ambiente de teste)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        # SQLite suporta um número limitado de conexões simultâneas,
-        # então é melhor não usar CONN_MAX_AGE ou definir um valor baixo
-        'CONN_MAX_AGE': 60,  # 1 minuto
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'portal_grs_db',
+        'USER': 'portal_grs_db_user',
+        'PASSWORD': 'BivlVcaMNRMbRVpbGudnZ9Q5ghkwFaQa',
+        'HOST': 'dpg-cv9sfgtumphs73aaul6g-a.oregon-postgres.render.com',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
