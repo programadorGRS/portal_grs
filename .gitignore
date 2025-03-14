@@ -1,0 +1,51 @@
+# Virtual Environment Directories
+venv/
+env/
+.venv/
+.env/
+.virtualenv/
+ENV/
+
+# Environment Files
+.env
+.venv
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# Local development settings
+local_settings.py
+
+# Sensitive files
+secrets.json
+
+db.sqlite3
+*.sqlite3
+
+
+*.pyc
+*.pyo
+*.pyd
