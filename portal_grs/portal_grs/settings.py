@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-%pyujf0qts@ihh=p9gpm$&r&-3&caa#l_#35aa=a1yp1k(#*=7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['portal-grs.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
